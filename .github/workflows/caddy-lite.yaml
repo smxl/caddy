@@ -1,0 +1,61 @@
+name: Caddy2Lite
+
+on:
+  push:
+    # tags:
+    #   - 'v*.*.*'
+    branches:
+      - main
+    paths:
+      - '.github/workflows/caddy-lite.yaml'
+  # schedule:
+  #   - cron: "0 0 * * Sat"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Setup Go
+      uses: actions/setup-go@master
+      with:
+        # stable: 'true'
+        go-version: '^1.19.3'
+
+    - name: install
+      run: |
+        go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+
+    - name: xcaddy
+      run: |
+        export version=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
+        export GOPATH=$HOME/go
+        export PATH=$PATH:$GOPATH/bin
+        echo CaddyVer=${version} >>$GITHUB_ENV
+        for arch in amd64 arm64
+        do
+          env GOOS=linux GOARCH=${arch} xcaddy build latest \
+          --with github.com/caddy-dns/cloudflare \
+          --with github.com/imgk/caddy-trojan \
+          --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive \
+          --output caddy_${arch}
+        zstd -k -19 caddy_${arch} -o caddy_linux-${arch}.zst
+        # rm caddy_${arch}
+        done
+
+    - name: upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Caddy2Lite
+        path: ./
+
+    - name: fin
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ env.CaddyVer }}
+        body: Caddy2Lite ${{ env.CaddyVer }} w/ cloudflare, trojan, forwardproxy
+        file: ./caddy*
+        overwrite: true
+        file_glob: true

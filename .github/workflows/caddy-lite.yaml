@@ -39,9 +39,8 @@ jobs:
           --with github.com/caddy-dns/cloudflare \
           --with github.com/imgk/caddy-trojan \
           --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive \
-          --output caddy_${arch}
-        zstd -k -19 caddy_${arch} -o caddy_linux-${arch}.zst
-        # rm caddy_${arch}
+          --output caddy_linux-${arch}
+        zstd -k -19 caddy_linux-${arch} -o caddy_linux-${arch}.zst
         done
 
     - name: upload
@@ -56,6 +55,6 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ env.CaddyVer }}
         body: Caddy2Lite ${{ env.CaddyVer }} w/ cloudflare, trojan, forwardproxy
-        file: ./caddy*
+        file: ./caddy_linux-*
         overwrite: true
         file_glob: true

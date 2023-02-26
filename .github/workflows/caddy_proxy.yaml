@@ -1,4 +1,4 @@
-name: Caddy2Proxy
+name: caddy-proxy
 
 on:
   push:

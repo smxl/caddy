@@ -1,4 +1,4 @@
-name: Caddy4Proxy
+name: Caddy2Proxy
 
 on:
   push:
@@ -52,7 +52,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ env.CaddyVer }}_Proxy
+        tag: ${{ env.CaddyVer }}_proxy
         body: Caddy4Proxy ${{ env.CaddyVer }} w/ trojan n forwardproxy
         file: ./caddy_linux-*
         overwrite: true

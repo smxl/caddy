@@ -1,4 +1,4 @@
-name: caddy-proxy
+name: caddy-min
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/caddy_proxy.yaml'
+      - '.github/workflows/caddy_min.yaml'
   # schedule:
   #   - cron: "0 0 * * Sat"
   workflow_dispatch:
@@ -19,9 +19,9 @@ jobs:
 
     - name: Setup Go
       uses: actions/setup-go@master
-      with:
+      # with:
         # stable: 'true'
-        go-version: '^1.19.3'
+        # go-version: '^1.19.3'
 
     - name: install
       run: |
@@ -45,7 +45,7 @@ jobs:
     - name: upload
       uses: actions/upload-artifact@v2
       with:
-        name: Caddy2Lite
+        name: caddymin
         path: ./
 
     - name: fin
@@ -53,7 +53,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ env.CaddyVer }}_proxy
-        body: Caddy4Proxy ${{ env.CaddyVer }} w/ trojan n forwardproxy
+        body: caddymin ${{ env.CaddyVer }} w/ trojan n forwardproxy
         file: ./caddy_linux-*
         overwrite: true
         file_glob: true

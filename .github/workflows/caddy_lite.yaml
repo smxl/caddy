@@ -52,8 +52,8 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ env.CaddyVer }}
-        body: Caddy2Lite ${{ env.CaddyVer }} w/ cloudflare, trojan, naiveproxy
+        tag: ${{ env.CaddyVer }}_lite
+        body: caddy_lite ${{ env.CaddyVer }} w/ cloudflare, trojan, naiveproxy
         file: ./caddy_linux-*
         overwrite: true
         file_glob: true

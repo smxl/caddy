@@ -83,9 +83,3 @@ trojan {
     }
 }
 ```
-
-
-
-## Caddy2 Lite with Addons
-
-cloudflare, trojan, naiveproxy

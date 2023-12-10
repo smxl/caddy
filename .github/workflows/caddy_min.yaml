@@ -42,15 +42,15 @@ jobs:
     - name: upload
       uses: actions/upload-artifact@v2
       with:
-        name: caddymin
+        name: caddy
         path: ./
 
     - name: fin
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ env.CaddyVer }}_min
-        body: caddy_min ${{ env.CaddyVer }} w/ trojan n forwardproxy
+        tag: ${{ env.CaddyVer }}
+        body: caddy ${{ env.CaddyVer }} w/ trojan n forwardproxy
         file: ./caddy_linux-*
         overwrite: true
         file_glob: true

@@ -2,6 +2,13 @@
 
 Caddy2 with Addons trojan, naiveproxy
 
+```
+xcaddy build latest \
+  --with github.com/imgk/caddy-trojan \
+  --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
+  ...
+```
+
 ## Config Example
 
 ### trojan

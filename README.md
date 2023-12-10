@@ -1,6 +1,6 @@
 # Caddy
 
-Caddy2 Lite with Addons trojan, naiveproxy
+Caddy2 with Addons trojan, naiveproxy
 
 ## Config Example
 

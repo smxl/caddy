@@ -48,3 +48,8 @@ trojan {
     }
 }
 ```
+
+#### naive client
+
+https://github.com/klzgrad/naiveproxy/releases/latest
+

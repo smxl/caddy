@@ -1,11 +1,11 @@
-name: caddy-min
+name: caddy
 
 on:
   push:
     branches:
       - main
     paths:
-      - '.github/workflows/caddy_min.yaml'
+      - '.github/workflows/caddy.yaml'
   schedule:
     - cron: "0 0 * * Sat"
   workflow_dispatch:

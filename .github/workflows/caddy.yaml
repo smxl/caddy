@@ -14,43 +14,47 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Setup Go environment
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 'latest'
+          check-latest: true
 
-    - name: Setup Go
-      uses: actions/setup-go@master
-      with:
-        check-latest: true
+      # Install xcaddy
+      - name: Install xcaddy
+        run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 
-    - name: install
-      run: |
-        go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+      # Build Caddy with plugins
+      - name: Build Caddy with plugins
+        env:
+          GOPATH: ${{ runner.home }}/go
+          PATH: ${{ runner.home }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
+        run: |
+          version=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
+          echo "CaddyVer=${version}" >> $GITHUB_ENV
+          for arch in amd64 arm64; do
+            xcaddy build latest \
+              --with github.com/imgk/caddy-trojan \
+              --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive \
+              --output caddy_linux-${arch}
+            zstd -k -19 caddy_linux-${arch} -o caddy_linux-${arch}.zst
+          done
 
-    - name: xcaddy
-      run: |
-        export version=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
-        export GOPATH=$HOME/go
-        export PATH=$PATH:$GOPATH/bin
-        echo CaddyVer=${version} >>$GITHUB_ENV
-        for arch in amd64 arm64
-        do
-          env GOOS=linux GOARCH=${arch} xcaddy build latest \
-          --with github.com/imgk/caddy-trojan \
-          --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive \
-          --output caddy_linux-${arch}
-        zstd -k -19 caddy_linux-${arch} -o caddy_linux-${arch}.zst
-        done
+      # Upload built artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: caddy
+          path: ./caddy_linux-*.zst
 
-    - name: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: caddy
-        path: ./
-
-    - name: fin
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ env.CaddyVer }}
-        body: caddy ${{ env.CaddyVer }} w/ trojan n forwardproxy
-        file: ./caddy_linux-*
-        overwrite: true
-        file_glob: true
+      # Upload release
+      - name: Upload release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.CaddyVer }}
+          body: Caddy ${{ env.CaddyVer }} with Trojan and Forwardproxy
+          file: ./caddy_linux-*.zst
+          overwrite: true
+          file_glob: true

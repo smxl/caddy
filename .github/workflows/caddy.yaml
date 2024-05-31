@@ -22,13 +22,16 @@ jobs:
 
       # Install xcaddy
       - name: Install xcaddy
+        env:
+          GOPATH: ${{ github.workspace }}/go  # Use GITHUB_WORKSPACE for GOPATH
+          PATH: ${{ github.workspace }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
         run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 
       # Build Caddy with plugins
       - name: Build Caddy with plugins
         env:
-          GOPATH: ${{ runner.home }}/go
-          PATH: ${{ runner.home }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
+          GOPATH: ${{ github.workspace }}/go  # Use GITHUB_WORKSPACE for GOPATH
+          PATH: ${{ github.workspace }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
         run: |
           version=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
           echo "CaddyVer=${version}" >> $GITHUB_ENV

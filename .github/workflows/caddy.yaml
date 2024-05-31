@@ -16,10 +16,9 @@ jobs:
     steps:
       # Setup Go environment
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: 'latest'
-          check-latest: true
+          check-latest: true  # Ensure the latest Go version is used
 
       # Install xcaddy
       - name: Install xcaddy

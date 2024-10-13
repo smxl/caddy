@@ -24,7 +24,14 @@ jobs:
         with:
           check-latest: true
 
-      # Ensure go.sum is generated
+      # Check if go.mod exists, if not, initialize go module
+      - name: Initialize Go module
+        run: |
+          if [ ! -f go.mod ]; then
+            go mod init github.com/yourrepo/yourproject
+          fi
+
+      # Generate go.sum
       - name: Generate go.sum
         run: go mod tidy
 

@@ -61,12 +61,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build  # 确保发布任务依赖于构建任务完成
     steps:
+      # Download artifacts (optional, but ensures the release job has access to the artifacts)
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: caddy-${{ matrix.arch }}
+
       # Upload release to GitHub
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.CaddyVer }}  # 确保 tag 被正确传递
+          tag: ${{ env.CaddyVer }}  # 使用在 build 中设置的 CaddyVer
           body: Caddy ${{ env.CaddyVer }} with Trojan and Forwardproxy
           file: ./caddy_linux-*.zst
           overwrite: true

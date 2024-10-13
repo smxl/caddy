@@ -72,7 +72,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.CaddyVer }}  # 使用在 build 中设置的 CaddyVer
+          tag: ${{ github.ref }}
           body: Caddy ${{ env.CaddyVer }} with Trojan and Forwardproxy
           file: artifacts/caddy-*/caddy_linux-*.zst
           overwrite: true

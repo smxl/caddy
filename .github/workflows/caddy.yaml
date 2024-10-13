@@ -13,44 +13,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]  # muti-arch
+
     steps:
       # Setup Go environment
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          check-latest: true  # Ensure the latest Go version is used
+          check-latest: true
 
       # Install xcaddy
       - name: Install xcaddy
-        env:
-          GOPATH: ${{ github.workspace }}/go  # Use GITHUB_WORKSPACE for GOPATH
-          PATH: ${{ github.workspace }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
         run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 
       # Build Caddy with plugins
       - name: Build Caddy with plugins
-        env:
-          GOPATH: ${{ github.workspace }}/go  # Use GITHUB_WORKSPACE for GOPATH
-          PATH: ${{ github.workspace }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
         run: |
-          version=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
-          echo "CaddyVer=${version}" >> $GITHUB_ENV
-          for arch in amd64 arm64; do
-            xcaddy build latest \
-              --with github.com/imgk/caddy-trojan \
-              --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive \
-              --output caddy_linux-${arch}
-            zstd -k -19 caddy_linux-${arch} -o caddy_linux-${arch}.zst
-          done
+          CaddyVer=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
+          echo "CaddyVer=${CaddyVer}" >> $GITHUB_ENV
+          xcaddy build latest \
+            --with github.com/imgk/caddy-trojan \
+            --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive \
+            --output caddy_linux-${{ matrix.arch }}
+          zstd -k -19 caddy_linux-${{ matrix.arch }} -o caddy_linux-${{ matrix.arch }}.zst
 
       # Upload built artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: caddy
-          path: ./caddy_linux-*.zst
+          name: caddy-${{ matrix.arch }}
+          path: ./caddy_linux-${{ matrix.arch }}.zst
 
-      # Upload release
+  release:
+    runs-on: ubuntu-latest
+    needs: build  # 
+    steps:
+      # Upload release to GitHub
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:

@@ -65,8 +65,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: caddy-${{ matrix.arch }}  # 确保使用正确的名称来下载工件
-  
+          path: artifacts
+
       # 上传 release 到 GitHub
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
@@ -74,7 +74,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ env.CaddyVer }}  # 使用在 build 中设置的 CaddyVer
           body: Caddy ${{ env.CaddyVer }} with Trojan and Forwardproxy
-          file: ./caddy_linux-*.zst
+          file: artifacts/caddy-*/caddy_linux-*.zst
           overwrite: true
           file_glob: true
-    

@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/caddy.yaml'
+      - '.github/workflows/caddy_v1.yaml'
   schedule:
     - cron: "0 0 * * Sat"
   workflow_dispatch:

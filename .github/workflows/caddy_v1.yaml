@@ -33,6 +33,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+        continue-on-error: true  # Continue even if cache restore fails
 
       # Install xcaddy
       - name: Install xcaddy
@@ -58,8 +59,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: caddy-${{ github.run_number }}
-          path: ./caddy_linux-*.zst
+          name: caddy-${{ github.run_number }}-${{ matrix.arch }}
+          path: ./caddy_linux-${{ matrix.arch }}.zst
 
       # Upload release
       - name: Upload release

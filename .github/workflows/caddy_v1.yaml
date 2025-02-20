@@ -1,0 +1,73 @@
+name: caddy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/caddy.yaml'
+  schedule:
+    - cron: "0 0 * * Sat"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      # Setup Go environment
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          check-latest: true  # Ensure the latest Go version is used
+
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Install xcaddy
+      - name: Install xcaddy
+        env:
+          GOPATH: ${{ github.workspace }}/go  # Use GITHUB_WORKSPACE for GOPATH
+          PATH: ${{ github.workspace }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
+        run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+
+      # Build Caddy with plugins
+      - name: Build Caddy with plugins
+        env:
+          GOPATH: ${{ github.workspace }}/go  # Use GITHUB_WORKSPACE for GOPATH
+          PATH: ${{ github.workspace }}/go/bin:${{ runner.home }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/go/bin:$PATH
+        run: |
+          version=$(curl -s "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)
+          echo "CaddyVer=${version}" >> $GITHUB_ENV
+          xcaddy build latest \
+            --with github.com/imgk/caddy-trojan \
+            --output caddy_linux-${{ matrix.arch }}
+          zstd -k -19 caddy_linux-${{ matrix.arch }} -o caddy_linux-${{ matrix.arch }}.zst
+
+      # Upload built artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: caddy
+          path: ./caddy_linux-*.zst
+
+      # Upload release
+      - name: Upload release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.CaddyVer }}
+          body: Caddy ${{ env.CaddyVer }} with Trojan
+          file: ./caddy_linux-*.zst
+          overwrite: true
+          file_glob: true

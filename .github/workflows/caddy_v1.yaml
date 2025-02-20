@@ -1,4 +1,4 @@
-name: caddy
+name: caddy v1
 
 on:
   push:
@@ -58,7 +58,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: caddy
+          name: caddy-${{ github.run_number }}
           path: ./caddy_linux-*.zst
 
       # Upload release
